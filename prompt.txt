@@ -1,0 +1,273 @@
+Here are the response schema for each endpoint for the catalogs/** routes.
+GET: 
+/catalog/terms/{termId}/lessons:
+[
+  {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "lessonNumber": 0,
+    "title": "string",
+    "isPaid": true,
+    "publishedAt": "2026-01-14T04:48:03.835Z"
+  }
+]
+
+GET: 
+/catalog/programs
+[
+  {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "title": "string",
+    "description": "string",
+    "publishedAt": "2026-01-14T04:49:46.825Z"
+  }
+]
+
+GET:
+/catalog/programs/{programId}
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "title": "string",
+  "description": "string",
+  "publishedAt": "2026-01-14T04:51:10.177Z"
+}
+
+GET:
+/catalog/programs/{programId}/terms
+[
+  {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "termNumber": 0,
+    "title": "string"
+  }
+]
+
+-- New Instructions --
+
+You did a great job implementing the public api routes for fetching catalog programs and their details.
+Now we are gonna work on the creation orf program, terms and lessons from the CMS side. only admin can create, edit programs, terms, lessons.
+editor can only edit the programs, terms, lessons but cannot create new ones.
+the viewer can only view the programs, terms and lessons.
+
+so here is the flow.
+user logs in with relevant role.
+and then he click on create program button.
+after he is taken to create a program where he can fill details for the program and upload images for the program.
+after he will pushed to create terms page where he can create terms for the program. with in that page he can create lessons for that term.
+at last tab he can review the program and publish it or schedule it.
+everything in this flow should be in tabs. handle error grace fully
+
+here are the api endpoints for creating program, terms and lessons.
+
+for uploading the images for the program use this route
+POST: /cms/assets/presign/program/{programId}
+this will return you a presigned url to upload the image to s3 directly.
+request:
+{
+  "assetType": "poster",
+  "variant": "portrait" || "landscape",
+  "language": "string",
+  "fileName": "string",
+  "contentType": "string"
+}
+and response:
+{
+  "uploadUrl": "string",
+  "publicUrl": "string"
+}
+note that we can only add images of type poster for the program.
+
+POST: /cms/assets/presign/lesson/{lessonId}
+this will return you a presigned url to upload the image to s3 directly.
+request:
+{
+  "assetType": "poster",
+  "variant": "portrait" || "landscape",
+  "language": "string",
+  "fileName": "string",
+  "contentType": "string"
+}
+and response:
+{
+  "uploadUrl": "string",
+  "publicUrl": "string"
+}
+note that we can add images and videos for the lesson handle this is code and do the same for the public route which hits this endpoint.
+
+to create a new program use this route
+POST: /cms/programs
+request:
+
+  {
+  "title": "string",
+  "description": "string",
+  "languagePrimary": "string",
+  "languagesAvailable": [
+    "string"
+  ]
+}
+response:
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "title": "string",
+  "description": "string",
+  "status": "draft",
+  "publishedAt": "2026-01-14T06:05:53.286Z"
+}
+
+to update a new program use this route
+PUT: /cms/programs/{programId}
+request:
+{
+  "title": "string",
+  "description": "string",
+  "languagePrimary": "string",
+  "languagesAvailable": [
+    "string"
+  ]
+} 
+and response:
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "title": "string",
+  "description": "string",
+  "status": "draft",
+  "publishedAt": "2026-01-14T06:07:22.233Z"
+}
+
+to get the programs use this route, this will allow you to get all programs including unpublished ones.
+GET: /cms/programs
+response:
+[
+  {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "title": "string",
+    "description": "string",
+    "status": "draft",
+    "publishedAt": "2026-01-14T06:08:48.486Z"
+  }
+]
+
+to schedule a program use this route
+/cms/programs/{programId}/schedule?publishAt={publishAt}
+it will respond with a 200 Ok
+
+to publish a program immediately use this route
+/cms/programs/{programId}/publish
+it will respond with a 200 Ok
+
+and for creating terms use this route
+POST: /cms/programs/{programId}/terms
+request:
+{
+  "termNumber": 0,
+  "title": "string"
+}
+response:
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "termNumber": 0,
+  "title": "string"
+}
+
+and for getting all the terms for the current program use this route
+GET: /cms/programs/{programId}/terms
+response:
+[
+  {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "termNumber": 0,
+    "title": "string"
+  }
+]
+
+for updating a term use this route
+PUT: /cms/terms/{termId}
+request:
+{
+  "termNumber": 0,
+  "title": "string"
+}
+response:
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "termNumber": 0,
+  "title": "string"
+}
+
+for creating a new term use this route
+POST: /cms/programs/{programId}/terms
+request:
+{
+  "termNumber": 0,
+  "title": "string"
+}
+response:
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "termNumber": 0,
+  "title": "string"
+}
+
+for lessons use the following route to create a lesson
+
+for getting the lessons under a term use this route
+GET: /cms/terms/{termId}/lessons
+response:
+[
+  {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "lessonNumber": 0,
+    "title": "string",
+    "status": "draft",
+    "publishAt": "2026-01-14T06:30:18.463Z",
+    "publishedAt": "2026-01-14T06:30:18.463Z"
+  }
+]
+
+for creating a lesson use this route
+POST: /cms/terms/{termId}/lessons
+request:
+{
+  "lessonNumber": 0,
+  "title": "string",
+  "contentType": "video",
+  "durationMs": 0,
+  "isPaid": true,
+  "contentLanguagePrimary": "string",
+  "contentLanguagesAvailable": [
+    "string"
+  ],
+  "contentUrlsByLanguage": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  }
+}
+response:
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "lessonNumber": 0,
+  "title": "string",
+  "status": "draft",
+  "publishAt": "2026-01-14T06:33:149.123Z",
+  "publishedAt": "2026-01-14T06:33:149.123Z"
+}
+
+for scheduling a lesson use this route
+/cms/lessons/{lessonId}/schedule
+request:
+{
+  "publishAt": "2026-01-14T06:35:00.000Z"
+}
+response: 200 OK
+
+--------------------------------
+
+You ve done a great job so far. Now, please implement the program edit flow.
+only admin and editor can edit the program.
+viewer can only view the program.
+
+only unpublished programs can be edited.
+program edit button they are redirected to edit program flow, where the first edit program details tab is shown simlar to create program tab.
+and they cannot edit the dp and cover pic once they are uploaded in the create program flow. they can add new terms and new lessons and they can add new image or remove images to the lesson and finally schedule or publish button.
+the flow should be very similar to create program flow. 
